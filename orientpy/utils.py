@@ -39,36 +39,29 @@ def catclean(cat):
     """ 
     This function looks for repeat events in a catalogue of 
     earthquakes.
-
     ADRIAN. K. DORAN and GABI LASKE, DLOPy VERSION 1.0, 
     RELEASED APRIL 2017
-
     Parameters
     ----------
     cat : :class:`~obspy.core.event.Catalog`
         Catalogue XML object, container for Event objects.
-
     Returns
     -------
     reps : :class:`~numpy.ndarray`
         Array of ID of repeat events in catalogue.
     
     """
-
     def close(x1, x2, val):
         if np.abs(x1 - x2) < val:
             return True
         else:
             return False
-
     rep = np.array([], dtype=int)
     for k, event in enumerate(cat):
         for kk, ev in enumerate(cat):
             if (ev.origins[0].time - event.origins[0].time < 60.*60.) and \
-                    close(ev.origins[0].latitude,
-                          event.origins[0].latitude, 0.8) and \
-                    close(ev.origins[0].longitude,
-                          event.origins[0].longitude, 0.8) and \
+                    close(ev.origins[0].latitude,event.origins[0].latitude, 0.8) and \
+                    close(ev.origins[0].longitude,event.origins[0].longitude, 0.8) and \
                     (ev.magnitudes[0].mag < event.magnitudes[0].mag - 0.3):
                 rep = np.append(rep, kk)
     return rep
@@ -92,12 +85,15 @@ def checklen(st, hrs):
     """
     L = len(st)
     for i in np.arange((L)):
-        if (UTCDateTime(st[i].stats.endtime) -
-                UTCDateTime(st[i].stats.starttime)) + 100. < hrs:
+        if (UTCDateTime(st[i].stats.endtime) - UTCDateTime(st[i].stats.starttime)) + 100 < hrs:
             return True
-    if np.var(st[0].data) < 1 or np.var(st[1].data) < 1 or \
-            np.var(st[2].data) < 1:
-        return True
+
+
+    # I don't know why this is here. It kills when a trace has a variance less than 1
+    # ...that is quite a high bar so I may be missing somthing. -crh 10/24
+    # if np.var(st[0].data) < 1 or np.var(st[1].data) < 1 or np.var(st[2].data) < 1:
+    #     return True
+
     return False
 
 
@@ -410,17 +406,14 @@ def pathvels(lat1, lon1, lat2, lon2,
             U1[k, 6] = map40[idx, 2]
         mhz = np.array([10, 15, 20, 25, 30, 35, 40])
         return np.array((mhz, hm(U1, axis=0))).T
-
     return Ray(D1), Ray(D2)
 
 
 def DLcalc(stream, Rf, LPF, HPF, epi, baz, A, winlen=10., ptype=0):
     """
     DORAN-LASKE calculation for one freq, one orbit of surface wave
-
     ADRIAN. K. DORAN and GABI LASKE, DLOPy VERSION 1.0, 
     RELEASED APRIL 2017
-
     Parameters
     ----------
     stream : float
@@ -433,48 +426,39 @@ def DLcalc(stream, Rf, LPF, HPF, epi, baz, A, winlen=10., ptype=0):
         Longitude of end point (deg)
     map* : :class:`~numpy.ndarray`
         maps of Rayleigh-wave dispersion at various frequencies
-
     Returns
     -------
     R1 : :class:`~numpy.ndarray`
         R1 velocity path 
-
     R2 : :class:`~numpy.ndarray`
         R2 velocity path 
-
     """
-
     # Pre-process
     stream.taper(type='hann', max_percentage=0.05)
     stream.filter("lowpass", freq=LPF, corners=4, zerophase=True)
     stream.filter("highpass", freq=HPF, corners=4, zerophase=True)
     stream.detrend()
-
     # Window info
     Rvel = getf(Rf, A)  # Group velocity at Rf
     R1window = (1.0/(Rf/1000.))*winlen
     arv = 1./Rvel * epi
     r1 = arv - R1window/2.
     r2 = arv + R1window/2.
-
     dt = stream[0].stats.starttime
+    print((r1,r2))
     st = stream.slice(starttime=dt+r1, endtime=dt+r2)
-
     # Extract waveform data for each component
     try:
-        tr1 = st.select(component='1')[0].data
-        tr2 = st.select(component='2')[0].data
+        tr1 = st.select(component='*1')[0].data
+        tr2 = st.select(component='*2')[0].data
     except:
-        tr1 = st.select(component='N')[0].data
-        tr2 = st.select(component='E')[0].data
+        tr1 = st.select(component='*N')[0].data
+        tr2 = st.select(component='*E')[0].data
     trZ = st.select(component='Z')[0].data
-
     # Calculate Hilbert transform of vertical trace data
     trZ = np.imag(sig.hilbert(trZ))
-
     # Ensure all data vectors are same length
     tr1, tr2, trZ = resiz(tr1, tr2, trZ)
-
     # Rotate through and find max normalized covariance
     dphi = 0.1
     ang = np.arange(0., 360., dphi)
@@ -486,17 +470,14 @@ def DLcalc(stream, Rf, LPF, HPF, epi, baz, A, winlen=10., ptype=0):
         cc1[k] = covmat[0, 1]
         cstar = np.cov(trZ, R)/np.cov(trZ)
         cc2[k] = cstar[0, 1]
-
     # Get argument of maximum of cc2
     ia = cc2.argmax()  
-
     # Get azimuth and correct for angles above 360
     phi = (baz - float(ia)*dphi) + 180.
     if phi < 0.:
         phi += 360.
     if phi >= 360.:
         phi -= 360.
-
     # # plotting:
     # # ptype=0, no plot
     # # ptype=1, Rayleigh plot
@@ -549,10 +530,8 @@ def DLcalc(stream, Rf, LPF, HPF, epi, baz, A, winlen=10., ptype=0):
     #     n, e = rot2d(rdat, rdat2, ANG/4.)
     #     plt.figure()
     #     plt.plot(T, vdat, label='Vertical')
-
     # if ptype > 0:
     #     plt.show()
-
     return phi, cc1[ia]
 
 
@@ -560,10 +539,8 @@ def DLcalc(stream, Rf, LPF, HPF, epi, baz, A, winlen=10., ptype=0):
 def estimate(phi, ind):
     """
     Function to estimate final azimuth from 
-
     ADRIAN. K. DORAN and GABI LASKE, DLOPy VERSION 1.0, 
     RELEASED APRIL 2017
-
     Parameters
     ----------
     phi : :class:`~numpy.ndarray`
@@ -571,29 +548,31 @@ def estimate(phi, ind):
     ind : list
         List of index values that satisfy some QC condition 
         for phi
-
     Returns
     -------
     m : float
         Mean value of robust, bootstrapped estimates
-
     s : float
         2 Standard deviations of robust, bootstrapped estimates
-
     """
-
     # Get phi', where conditions are met
     phip = phi[ind]
-
     # Re-center at circular mean
     phip = centerat(phip, m=cmean(phi, high=360))
-
     # Remove outliers
     phipp = outlier(phip, 5.)
-
     # bootstrap results for statistic
     m = boot(phipp, 5000)
-
     return cmean(m, high=360), 2*1.96*cstd(m, high=360)
 
+def write_pickle(file,var):
+    import pickle
+    with open(str(file), 'wb') as handle:
+        pickle.dump(var, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    print('Saved to :' + str(file))
 
+def load_pickle(file):
+    import pickle
+    with open(file, 'rb') as handle:
+        b = pickle.load(handle)
+    return b

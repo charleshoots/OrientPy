@@ -18,9 +18,7 @@ from numpy import nan
 def get_bng_average_arguments(argv=None):
     """
     Get Options from :class:`~optparse.OptionParser` objects.
-
     This function is used for data processing on-the-fly (requires web connection)
-
     """
 
     parser = ArgumentParser(
@@ -134,7 +132,6 @@ def main(args=None):
     if args is None:
         # Run Input Parser
         args = get_bng_average_arguments()
-
     # Load Database
     db, stkeys = stdb.io.load_db(fname=args.indb, keys=args.stkeys)
 
