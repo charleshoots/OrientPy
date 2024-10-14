@@ -23,7 +23,7 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-from orientpy import utils
+from . import io, utils, plotting
 import numpy as np
 from scipy.stats import gaussian_kde
 

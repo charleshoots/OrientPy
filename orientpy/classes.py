@@ -29,7 +29,7 @@ from obspy import Trace, Stream, UTCDateTime
 from scipy.stats import circmean as cmean
 from scipy.stats import circstd as cstd
 from scipy.stats import hmean as hm
-from orientpy import io, utils, plotting
+from . import io, utils, plotting
 from obspy.signal.rotate import rotate_rt_ne, rotate_ne_rt
 from pkg_resources import resource_filename
 

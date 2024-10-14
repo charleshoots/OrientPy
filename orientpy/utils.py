@@ -77,23 +77,18 @@ def catclean(cat):
 def checklen(st, hrs):
     """
     Function to check if there is enough downloaded data to run program
-
     ADRIAN. K. DORAN and GABI LASKE, DLOPy VERSION 1.0, 
     RELEASED APRIL 2017
-
     Parameters
     ----------
     st : :class:`~obspy.core.Stream`
         Stream containing waveforms
     hrs : float
         Amount of time (hours) that should be available for analysis
-
     Returns
     -------
-
     boolean
         Whether or not the check is successful
-
     """
     L = len(st)
     for i in np.arange((L)):
@@ -109,21 +104,16 @@ def checklen(st, hrs):
 def resiz(x1, x2, x3):
     """
     Function to resize arrays to all identical shapes
-
     ADRIAN. K. DORAN and GABI LASKE, DLOPy VERSION 1.0, 
     RELEASED APRIL 2017
-
     Parameters
     ----------
     x* : :class:`~numpy.ndarray`
         Array for which to check length (here it's trace.data)
-
     Returns
     -------
-
     x* : :class:`~numpy.ndarray`
         Array trimmed to shortest segment
-
     """
     L = np.min(np.array([len(x1), len(x2), len(x3)]))
     return x1[0:L], x2[0:L], x3[0:L]
@@ -132,24 +122,19 @@ def resiz(x1, x2, x3):
 def getf(freq, A):
     """
     Function to extract frequency in array.
-
     ADRIAN. K. DORAN and GABI LASKE, DLOPy VERSION 1.0, 
     RELEASED APRIL 2017
-
     Parameters
     ----------
     freq : float
         Frequency of interest (Hz)
     A : :class:`~numpy.ndarray`
         Array of frequencies obtained from global dispersion maps
-
     Returns
     -------
     v : float
         Nearest frequency in A
-
     """
-
     for i in np.arange((len(A))):
         if A[i, 0] == freq:
             v = A[i, 1]
@@ -159,24 +144,19 @@ def getf(freq, A):
 def nv(x, v):
     """
     Function to find nearest value in an np.array.
-
     ADRIAN. K. DORAN and GABI LASKE, DLOPy VERSION 1.0, 
     RELEASED APRIL 2017
-
     Parameters
     ----------
     x : :class:`~numpy.ndarray`
         Input array
     v : float
         Value to compare within array
-
     Returns
     -------
     x[idx] : float
         Nearest value to v in x
-
     """
-
     return x[(np.abs(x - v)).argmin()]
 
 
