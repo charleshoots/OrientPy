@@ -445,7 +445,7 @@ def DLcalc(stream, Rf, LPF, HPF, epi, baz, A, winlen=10., ptype=0):
     r1 = arv - R1window/2.
     r2 = arv + R1window/2.
     dt = stream[0].stats.starttime
-    print((r1,r2))
+    print(['epi:',epi,'Vs:',Rvel,'Fq:',Rf,'R1:',r1,'R2:',r2])
     st = stream.slice(starttime=dt+r1, endtime=dt+r2)
     # Extract waveform data for each component
     try:

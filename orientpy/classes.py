@@ -504,6 +504,9 @@ class DL(Orient):
         # Rf, LPF, HPF, epi, baz, A, winlen=10
         flist = zip(Rf, HPF, LPF, winlen1, winlen2)
         # for k, item in enumerate(flist):
+        print('=='*30)
+        print('GAC:: '+str(self.meta.gac))
+        print('__'*30)
         for k,(rf_k,hpf_k,lpf_k,winlen1_k,winlen2_k) in enumerate(flist):
             # R1 path    rf_k,hpf_k,lpf_k,winlen1_k,winlen2_k
             R1phi[k], R1cc[k] = utils.DLcalc(stream, rf_k, hpf_k,lpf_k, self.meta.epi_dist, self.meta.baz, Ray1,winlen=winlen1_k, ptype=0)
